@@ -21,43 +21,43 @@ def viz(arch, widths, layers, dimensions):
     # colors = plt.cm.gist_rainbow(np.linspace(0, 1, 8))
     colors = plt.cm.gist_rainbow(np.linspace(0, 1, 5))
 
-    fixed_params = [0.2, 0.5, 1.0, 1.5, 2.0]
+    fixed_params = [0, 0.5, 1.0]
 
     plt.rcParams.update({'font.size': 14, 'legend.fontsize': 14})
 
     for l in layers:
         for w in widths:
             # One4All
-            file_name = f'{output}/output/{transform}/One4All/{arch}_{l}_{w}/acc.npy'
-            acc_one4all = pickle.loads(np.load(file_name))
+            # file_name = f'{output}/output/{transform}/One4All/{arch}_{l}_{w}/acc.npy'
+            # acc_one4all = pickle.loads(np.load(file_name))
 
             # Inverse
-            file_name = f'{output}/output/{transform}/Inverse/{arch}_{l}_{w}/acc.npy'
-            acc_inverse = pickle.loads(np.load(file_name))
+            # file_name = f'{output}/output/{transform}/Inverse/{arch}_{l}_{w}/acc.npy'
+            # acc_inverse = pickle.loads(np.load(file_name))
 
             # LinearConnect
             file_name = f'{output}/output/{transform}/LinearConnect/{arch}_{l}_{w}/acc.npy'
             acc_lincon = np.array(pickle.loads(np.load(file_name))['linearconnect'])[:, 1]
 
             # One4one
-            file_name = f'{output}/output/{transform}/One4One/{arch}_{l}_{w}/acc.npy'
-            acc_one4one = pickle.loads(np.load(file_name))
+            # file_name = f'{output}/output/{transform}/One4One/{arch}_{l}_{w}/acc.npy'
+            # acc_one4one = pickle.loads(np.load(file_name))
 
-            theta = np.arange(0.2, 2, 0.05)
+            theta = [0, 0.5, 1.0]
 
             # Plot acc
             fig = plt.figure()
             fig.tight_layout()
             fig, ax = plt.subplots()
-            ax.plot(theta, acc_one4all, label='One4All', color='grey', lw=3)
-            ax.plot(theta, acc_inverse, label='Inverse', color='cyan', lw=3)
+            # ax.plot(theta, acc_one4all, label='One4All', color='grey', lw=3)
+            # ax.plot(theta, acc_inverse, label='Inverse', color='cyan', lw=3)
             ax.plot(theta, acc_lincon, label='LMC', color='k', lw=3)
             for i, d in zip(range(len(dimensions)), dimensions):
                 file_name = f'{output}/output/{transform}/SCN/hhn{arch}_{l}_{w}_{d}/acc.npy'
                 acc_hhn = pickle.loads(np.load(file_name))
                 ax.plot(theta, acc_hhn['acc'], label=f'SCN D={d}', color=colors[i])
-            for param in fixed_params:
-                ax.plot(param, acc_one4one[str(param)], '*', color='grey', lw=3, markersize=10, markerfacecolor='white')
+            # for param in fixed_params:
+            #     ax.plot(param, acc_one4one[str(param)], '*', color='grey', lw=3, markersize=10, markerfacecolor='white')
 
             ax.grid(True)
             plt.title(f'{transform} - {arch} - pollen', fontsize=16, pad=20)
@@ -67,29 +67,29 @@ def viz(arch, widths, layers, dimensions):
             plt.savefig(f"./figs/{transform}/viz_acc_{arch}_{l}_{w}.png", bbox_inches='tight', dpi=300)
 
             # Beta space
-            fig = plt.figure()
-            fig.tight_layout()
-            fig, ax = plt.subplots(1, len(dimensions), sharey=True)
-            plt.rc('font', **{'size': 4})
-            for d_id, d in zip(range(len(dimensions)), dimensions):
-                file_name = f'{output}/output/{transform}/SCN/hhn{arch}_{l}_{w}_{d}/acc.npy'
-                acc_hhn = pickle.loads(np.load(file_name))
-                cols = cm.gist_rainbow(np.linspace(0, 1, d))
-                for i in range(len(acc_hhn['beta_space'][0])):
-                    yline = acc_hhn['beta_space'][:, i]
-                    ax[d_id].plot(theta, yline, alpha=0.5, color=cols[i], label=r'$\beta_{%d}$' % (i + 1))
-                ax[d_id].tick_params(axis='x', which='major', labelsize=4)
-                ax[d_id].tick_params(axis='y', which='major', labelsize=4)
-                ax[d_id].legend(loc='upper right', prop={'size': 3})
-                ax[d_id].axes.xaxis.labelpad = -1
-                ax[d_id].set_xlabel(r'$\alpha$', fontsize=4)
-                ax[d_id].grid(True, linestyle=':')
-                ax[d_id].set_title(f'D={d}')
-            for d_id in range(len(dimensions)):
-                ax[d_id].axis('square')
-                # ax[d_id].set_aspect(0.5)
-                ax[d_id].autoscale(enable=True, axis='both', tight=True)
-            plt.savefig(f"{output}/figs/{transform}/viz_beta_{arch}_{l}_{w}.png", bbox_inches='tight', dpi=600)
+            # fig = plt.figure()
+            # fig.tight_layout()
+            # fig, ax = plt.subplots(1, len(dimensions), sharey=True)
+            # plt.rc('font', **{'size': 4})
+            # for d_id, d in zip(range(len(dimensions)), dimensions):
+            #     file_name = f'{output}/output/{transform}/SCN/hhn{arch}_{l}_{w}_{d}/acc.npy'
+            #     acc_hhn = pickle.loads(np.load(file_name))
+            #     cols = cm.gist_rainbow(np.linspace(0, 1, d))
+            #     for i in range(len(acc_hhn['beta_space'][0])):
+            #         yline = acc_hhn['beta_space'][:, i]
+            #         ax[d_id].plot(theta, yline, alpha=0.5, color=cols[i], label=r'$\beta_{%d}$' % (i + 1))
+            #     ax[d_id].tick_params(axis='x', which='major', labelsize=4)
+            #     ax[d_id].tick_params(axis='y', which='major', labelsize=4)
+            #     ax[d_id].legend(loc='upper right', prop={'size': 3})
+            #     ax[d_id].axes.xaxis.labelpad = -1
+            #     ax[d_id].set_xlabel(r'$\alpha$', fontsize=4)
+            #     ax[d_id].grid(True, linestyle=':')
+            #     ax[d_id].set_title(f'D={d}')
+            # for d_id in range(len(dimensions)):
+            #     ax[d_id].axis('square')
+            #     # ax[d_id].set_aspect(0.5)
+            #     ax[d_id].autoscale(enable=True, axis='both', tight=True)
+            # plt.savefig(f"{output}/figs/{transform}/viz_beta_{arch}_{l}_{w}.png", bbox_inches='tight', dpi=600)
 
 def dacc(arch, widths, layers):
     dimensions = [1, 2, 3, 5, 8]
@@ -165,14 +165,14 @@ def dacc(arch, widths, layers):
 
 
 if __name__ == '__main__':
-    viz('mlpb', widths=[16], layers=[1], dimensions=[1, 2, 3, 5, 8])
+    # viz('mlpb', widths=[16], layers=[1], dimensions=[1, 2, 3, 5, 8])
     dacc('mlpb', widths=[16], layers=[1])
 
-    viz('mlpb', widths=[32], layers=[1], dimensions=[1, 2, 3, 5, 8])
-    dacc('mlpb', widths=[32], layers=[1])
+    # viz('mlpb', widths=[32], layers=[1], dimensions=[1, 2, 3, 5, 8])
+    # dacc('mlpb', widths=[32], layers=[1])
 
-    viz('mlpb', widths=[64], layers=[1], dimensions=[1, 2, 3, 5, 8])
-    dacc('mlpb', widths=[64], layers=[1])
+    # viz('mlpb', widths=[64], layers=[1], dimensions=[1, 2, 3, 5, 8])
+    # dacc('mlpb', widths=[64], layers=[1])
 
-    viz('sconvb', widths=[32], layers=[2], dimensions=[1, 2, 3, 5, 8])
-    dacc('sconvb', widths=[32], layers=[2])
+    # viz('sconvb', widths=[32], layers=[2], dimensions=[1, 2, 3, 5, 8])
+    # dacc('sconvb', widths=[32], layers=[2])

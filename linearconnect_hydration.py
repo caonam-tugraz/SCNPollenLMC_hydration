@@ -30,7 +30,7 @@ parser.add_argument('--arch', '-a', default='sconvb_hydration', type=str) # scon
 parser.add_argument('--nlayers', default=1, type=int)
 parser.add_argument('--width', default=512, type=int)
 parser.add_argument('--epochs', default=100, type=int)
-parser.add_argument('--learning_rate', default=0.0005, type=float)
+parser.add_argument('--learning_rate', default=0.0001, type=float)
 parser.add_argument('--transform', default='brightness', type=str)
 parser.add_argument('--output', default='output', type=str)
 args = parser.parse_args()
@@ -148,38 +148,39 @@ def main():
         
         exhausted_datasets = set()
         
-        while len(exhausted_datasets) < 1:
-            # Randomly choose a dataset
-            t = random.choice([0, 0.5, 1.0])
-            
-            if t == 0 and 0 not in exhausted_datasets:
-                try:
-                    inputs, labels = next(iterator1)
-                    # print("Batch from Dataset 1")
-                except StopIteration:
-                    exhausted_datasets.add(0)
-                    continue
-            elif t == 0.5 and 0.5 not in exhausted_datasets:
-                try:
-                    inputs, labels = next(iterator2)
-                    # print("Batch from Dataset 2")
-                except StopIteration:
-                    iterator2 = iter(dataloaders['train_half_hydrated'])
-                    # exhausted_datasets.add(0.5)
-                    continue
-            elif t == 1 and 1 not in exhausted_datasets:
-                try:
-                    inputs, labels = next(iterator3)
-                    # print("Batch from Dataset 3")
-                except StopIteration:
-                    iterator3 = iter(dataloaders['train_dry'])
-                    # exhausted_datasets.add(1)
-                    continue
-            
-            inputs, labels = inputs.to(device), labels.to(device)
-
+        while len(exhausted_datasets) < 3:
+            # Randomly choose a dataset, it's equivalent to image transformation
             loss = 0
             for _ in range(10):
+                t = random.choice([0, 0.5, 1.0])
+                
+                if t == 0 and 0 not in exhausted_datasets:
+                    try:
+                        inputs, labels = next(iterator1)
+                        # print("Batch from Dataset 1")
+                    except StopIteration:
+                        exhausted_datasets.add(0)
+                        continue
+                elif t == 0.5 and 0.5 not in exhausted_datasets:
+                    try:
+                        inputs, labels = next(iterator2)
+                        # print("Batch from Dataset 2")
+                    except StopIteration:
+    
+                        exhausted_datasets.add(0.5)
+                        continue
+                elif t == 1 and 1 not in exhausted_datasets:
+                    try:
+                        inputs, labels = next(iterator3)
+                        # print("Batch from Dataset 3")
+                    except StopIteration:
+    
+                        exhausted_datasets.add(1)
+                        continue
+                
+                inputs, labels = inputs.to(device), labels.to(device)
+
+            
                 logits = m0.linearcurve(m0, m1, t, inputs)
                 loss += lfn(logits, labels)
 
@@ -251,8 +252,9 @@ def main():
         remaining_dts = [elem for elem in eval_dataset_list if elem != evdts_name]
         
         acc1, loss1 = evaluate_param(mtmp.cuda(), loader=dataloaders[remaining_dts[0]])
+        print(remaining_dts[0])
         acc2, loss2 = evaluate_param(mtmp.cuda(), loader=dataloaders[remaining_dts[1]])
-
+        print(remaining_dts[1])
         
         print(f"{t} --> {[acc, acc1, acc2]}")
         # print(f"{t} --> {[acc]}")
