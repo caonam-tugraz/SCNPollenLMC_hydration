@@ -204,7 +204,7 @@ def main():
         acc, loss = evaluate_param(mtmp.cuda(), loader=test_loader, param1=params[0], param2=params[1], lam=t)
         acc0, loss0 = evaluate_param(mtmp.cuda(), loader=test_loader, param1=params[0], param2=params[1], lam=0)
         acc90, loss90 = evaluate_param(mtmp.cuda(), loader=test_loader, param1=params[0], param2=params[1], lam=0.5)
-        acc180, loss180 = evaluate_param(mtmp.cuda(), loader=test_loader, param1=params[0], param2=params[1], lam=1)
+        acc180, loss180 = evaluate_param(mtmp.cuda(), loader=test_loader, param1=params[0], param2=params[1], lam=1.0)
         print(f"{param} --> {[acc, acc0, acc90, acc180]}")
         linearconnect.append([param, acc, acc0, acc90, acc180])
 
