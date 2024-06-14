@@ -17,7 +17,7 @@ from PIL import Image
 from collections import defaultdict
 
 import utils
-import wandb
+# import wandb
 
 os.environ["WANDB_API_KEY"] = "0585383768fd4b78bb36a7ed79cf1e7f1c29957f"
 
@@ -25,13 +25,13 @@ parser = argparse.ArgumentParser(description='Qcurves')
 parser.add_argument('--dataset', default='FashionMNIST', type=str,
                     help='MNIST | FashionMNIST | CIFAR10 | CIFAR100 | SVHN')
 parser.add_argument('--datadir', default='data', type=str)
-parser.add_argument('--batchsize', default=256, type=int)
+parser.add_argument('--batchsize', default=128, type=int)
 parser.add_argument('--arch', '-a', default='sconvb_hydration', type=str) # sconvb_hydration, mlpb_hydration
 parser.add_argument('--nlayers', default=1, type=int)
 parser.add_argument('--width', default=512, type=int)
 parser.add_argument('--epochs', default=100, type=int)
 parser.add_argument('--learning_rate', default=0.0001, type=float)
-parser.add_argument('--transform', default='brightness', type=str)
+parser.add_argument('--transform', default='hydration', type=str)
 parser.add_argument('--output', default='output', type=str)
 args = parser.parse_args()
 
@@ -144,50 +144,55 @@ def main():
     
     lfn = torch.nn.CrossEntropyLoss()
     opt = torch.optim.Adam([*m0.parameters(), *m1.parameters()], lr=args.learning_rate)
+    
+    def reset_iterator(data_loader):
+        return iter(data_loader)
+
     for ep in range(args.epochs):
+        # Initialize iterators
+        iterator1 = reset_iterator(dataloaders['train_hydrated'])
+        iterator2 = reset_iterator(dataloaders['train_half_hydrated'])
+        iterator3 = reset_iterator(dataloaders['train_dry'])
         
-        exhausted_datasets = set()
-        
-        while len(exhausted_datasets) < 3:
-            # Randomly choose a dataset, it's equivalent to image transformation
+        for _ in range(12):  # loop for 10 batches
+
+            # Randomly choose a dataset
             loss = 0
-            for _ in range(10):
+            for _ in range(10):  # Accumulate gradients over 10 batches
                 t = random.choice([0, 0.5, 1.0])
                 
-                if t == 0 and 0 not in exhausted_datasets:
+                if t == 0:
                     try:
                         inputs, labels = next(iterator1)
-                        # print("Batch from Dataset 1")
                     except StopIteration:
-                        exhausted_datasets.add(0)
-                        continue
-                elif t == 0.5 and 0.5 not in exhausted_datasets:
+                        iterator1 = reset_iterator(dataloaders['train_hydrated'])
+                        inputs, labels = next(iterator1)
+                elif t == 0.5:
                     try:
                         inputs, labels = next(iterator2)
-                        # print("Batch from Dataset 2")
                     except StopIteration:
-    
-                        exhausted_datasets.add(0.5)
-                        continue
-                elif t == 1 and 1 not in exhausted_datasets:
+                        iterator2 = reset_iterator(dataloaders['train_half_hydrated'])
+                        inputs, labels = next(iterator2)
+                elif t == 1:
                     try:
                         inputs, labels = next(iterator3)
-                        # print("Batch from Dataset 3")
                     except StopIteration:
-    
-                        exhausted_datasets.add(1)
-                        continue
+                        iterator3 = reset_iterator(dataloaders['train_dry'])
+                        inputs, labels = next(iterator3)
                 
                 inputs, labels = inputs.to(device), labels.to(device)
-
-            
+    
                 logits = m0.linearcurve(m0, m1, t, inputs)
                 loss += lfn(logits, labels)
-
+    
             opt.zero_grad()
             loss.backward()
             opt.step()
-        print(f"epoch {ep} loss: {loss}")
+            
+            print(f"epoch {ep} step loss: {loss}")
+    
+        print(f"epoch {ep} completed")
+    
         # wandb.log({"train/loss": loss})
 
     destination_name = f'{args.output}/{args.transform}/LinearConnect/{save_dir}'
