@@ -11,7 +11,7 @@ import torch
 from torch import nn, Tensor
 from torch.utils.data import DataLoader
 import torchvision.transforms.functional as TF
-import wandb
+# import wandb
 from torchvision import datasets, models, transforms
 import torch.utils.data as data
 
@@ -20,22 +20,25 @@ os.environ["WANDB_API_KEY"] = "0585383768fd4b78bb36a7ed79cf1e7f1c29957f"
 
 parser = argparse.ArgumentParser(description='SCN Pollen')
 parser.add_argument('--datadir', default='data', type=str)
-parser.add_argument('--batchsize', default=64, type=int)
+parser.add_argument('--batchsize', default=256, type=int)
 parser.add_argument('--save-dir', dest='save_dir', default='save_temp', type=str)
-parser.add_argument('--arch', '-a', metavar='ARCH', default='sconvb')
+parser.add_argument('--arch', '-a', metavar='ARCH', default='mlpb')
 parser.add_argument('--nlayers', default=1, type=int)
-parser.add_argument('--width', default=32, type=int)
-parser.add_argument('--epochs', default=200, type=int)
+parser.add_argument('--width', default=512, type=int)
+parser.add_argument('--epochs', default=100, type=int)
 parser.add_argument('--learning_rate', default=0.0001, type=float)
 parser.add_argument('--dimensions', default=1, type=int)
 parser.add_argument('--transform', default='brightness', type=str)
 parser.add_argument('--output', default='.', type=str)
 args = parser.parse_args()
 
-dataset_root_folder = f'./data/images_7_types_7030'
+# dataset_root_folder = './data/images_3_types_dry_7030'
+dataset_root_folder = './data/images_3_types_dry_7030'
+
 train_directory = f'{dataset_root_folder}_train'
 valid_directory = f'{dataset_root_folder}_val'
 test_directory = f'{dataset_root_folder}_test'
+
 
 # Applying transforms to the data
 image_transforms = {
@@ -75,8 +78,8 @@ dataloaders = {
                             num_workers=4, pin_memory=True, drop_last=False),
 }
 
-fixed_params = [0.2, 0.5, 1.0, 1.5, 2.0]
-# fixed_params = [1.0]
+# fixed_params = [0.2, 0.5, 1.0, 1.5, 2.0]
+fixed_params = [1.0]
 
 def main():
     utils.set_seed(13)
@@ -111,14 +114,14 @@ def main():
             for batch, (X, y) in enumerate(tqdm(dataloader, desc='Training')):
                 X, y = X.to(device), y.to(device)
                 
-                if args.transform == "brightness":
-                    X = TF.adjust_brightness(X, brightness_factor=param)
-                elif args.transform == "contrast":
-                    X = TF.adjust_contrast(X, contrast_factor=param)
-                elif args.transform == "saturation":
-                    X = TF.adjust_saturation(X, saturation_factor=param)
-                elif args.transform == "sharpness":
-                    X = TF.adjust_sharpness(X, sharpness_factor=param)
+                # if args.transform == "brightness":
+                #     X = TF.adjust_brightness(X, brightness_factor=param)
+                # elif args.transform == "contrast":
+                #     X = TF.adjust_contrast(X, contrast_factor=param)
+                # elif args.transform == "saturation":
+                #     X = TF.adjust_saturation(X, saturation_factor=param)
+                # elif args.transform == "sharpness":
+                #     X = TF.adjust_sharpness(X, sharpness_factor=param)
 
                 pred = model(X)
                 loss = loss_fn(pred, y)
@@ -134,14 +137,14 @@ def main():
             with torch.no_grad():
                 for X, y in dataloader:
                     X, y = X.to(device), y.to(device)
-                    if args.transform == "brightness":
-                        X = TF.adjust_brightness(X, brightness_factor=param)
-                    elif args.transform == "contrast":
-                        X = TF.adjust_contrast(X, contrast_factor=param)
-                    elif args.transform == "saturation":
-                        X = TF.adjust_saturation(X, saturation_factor=param)
-                    elif args.transform == "sharpness":
-                        X = TF.adjust_sharpness(X, sharpness_factor=param)
+                    # if args.transform == "brightness":
+                    #     X = TF.adjust_brightness(X, brightness_factor=param)
+                    # elif args.transform == "contrast":
+                    #     X = TF.adjust_contrast(X, contrast_factor=param)
+                    # elif args.transform == "saturation":
+                    #     X = TF.adjust_saturation(X, saturation_factor=param)
+                    # elif args.transform == "sharpness":
+                    #     X = TF.adjust_sharpness(X, sharpness_factor=param)
 
                     pred = model(X)
                     test_loss += loss_fn(pred, y).item()

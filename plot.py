@@ -165,14 +165,14 @@ def dacc(arch, widths, layers):
 
 
 if __name__ == '__main__':
-    viz('mlpb', widths=[16], layers=[1], dimensions=[1, 2, 3, 5, 8])
-    dacc('mlpb', widths=[16], layers=[1])
+    # viz('mlpb', widths=[16], layers=[1], dimensions=[1, 2, 3, 5, 8])
+    # dacc('mlpb', widths=[16], layers=[1])
 
     viz('mlpb', widths=[32], layers=[1], dimensions=[1, 2, 3, 5, 8])
     dacc('mlpb', widths=[32], layers=[1])
 
-    viz('mlpb', widths=[64], layers=[1], dimensions=[1, 2, 3, 5, 8])
-    dacc('mlpb', widths=[64], layers=[1])
+    # viz('mlpb', widths=[64], layers=[1], dimensions=[1, 2, 3, 5, 8])
+    # dacc('mlpb', widths=[64], layers=[1])
 
-    viz('sconvb', widths=[32], layers=[2], dimensions=[1, 2, 3, 5, 8])
-    dacc('sconvb', widths=[32], layers=[2])
+    viz('sconvb', widths=[32], layers=[1], dimensions=[1, 2, 3, 5, 8])
+    dacc('sconvb', widths=[32], layers=[1])

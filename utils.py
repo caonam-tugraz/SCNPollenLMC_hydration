@@ -74,10 +74,22 @@ def prepare_model(args, nchannels, nclasses, hin=1):
         save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
         model = HHN_MLP(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
                         n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+        
+    elif "hhnmlp_hydration" == args.arch:
+        save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
+        model = HHN_MLP(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
+                        n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+        
     elif "hhnmlpb" == args.arch:
         save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
         model = HHN_MLPB(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
                          n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+    
+    elif "hhnmlpb_hydration" == args.arch:
+        save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
+        model = HHN_MLPB(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
+                         n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+        
 
     elif "sconv" == args.arch:
         model = SConv(n_layers=args.nlayers, n_units=args.width, n_channels=nchannels, n_classes=nclasses)
@@ -91,7 +103,16 @@ def prepare_model(args, nchannels, nclasses, hin=1):
         save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
         model = HHN_SConv(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
                         n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+    elif "hhnsconv_hydration" == args.arch:
+         save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
+         model = HHN_SConv(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
+                         n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+         
     elif "hhnsconvb" == args.arch:
+        save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
+        model = HHN_SConvB(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
+                         n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+    elif "hhnsconvb_hydration" == args.arch:
         save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
         model = HHN_SConvB(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
                          n_units=args.width, n_channels=nchannels, n_classes=nclasses)

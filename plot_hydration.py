@@ -13,7 +13,7 @@ import utils
 from matplotlib.ticker import StrMethodFormatter
 
 output = "."
-transform = "brightness"
+transform = "hydration"
 os.makedirs(f'{output}/figs/{transform}/', exist_ok=True)
 
 
@@ -28,8 +28,8 @@ def viz(arch, widths, layers, dimensions):
     for l in layers:
         for w in widths:
             # One4All
-            # file_name = f'{output}/output/{transform}/One4All/{arch}_{l}_{w}/acc.npy'
-            # acc_one4all = pickle.loads(np.load(file_name))
+            file_name = f'{output}/output/{transform}/One4All/{arch}_{l}_{w}/acc.npy'
+            acc_one4all = pickle.loads(np.load(file_name))
 
             # Inverse
             # file_name = f'{output}/output/{transform}/Inverse/{arch}_{l}_{w}/acc.npy'
@@ -49,21 +49,23 @@ def viz(arch, widths, layers, dimensions):
             fig = plt.figure()
             fig.tight_layout()
             fig, ax = plt.subplots()
-            # ax.plot(theta, acc_one4all, label='One4All', color='grey', lw=3)
+            ax.plot(theta, acc_one4all, label='One4All', color='grey', lw=3)
             # ax.plot(theta, acc_inverse, label='Inverse', color='cyan', lw=3)
             ax.plot(theta, acc_lincon, label='LMC', color='k', lw=3)
             for i, d in zip(range(len(dimensions)), dimensions):
                 file_name = f'{output}/output/{transform}/SCN/hhn{arch}_{l}_{w}_{d}/acc.npy'
                 acc_hhn = pickle.loads(np.load(file_name))
                 ax.plot(theta, acc_hhn['acc'], label=f'SCN D={d}', color=colors[i])
-            # for param in fixed_params:
-            #     ax.plot(param, acc_one4one[str(param)], '*', color='grey', lw=3, markersize=10, markerfacecolor='white')
+
 
             ax.grid(True)
             plt.title(f'{transform} - {arch} - pollen', fontsize=16, pad=20)
+            # plt.legend(ncol=2, prop={'size': 10})
             plt.legend(bbox_to_anchor=(0.85, -0.1), ncol=2, prop={'size': 10})
             ax.tick_params(axis='x', which='major', labelsize=12)
             ax.tick_params(axis='y', which='major', labelsize=12)
+            ax.set_xticks([0, 0.5, 1.0])
+            
             plt.savefig(f"./figs/{transform}/viz_acc_{arch}_{l}_{w}.png", bbox_inches='tight', dpi=300)
 
             # Beta space
@@ -152,6 +154,7 @@ def dacc(arch, widths, layers):
             plt.xlabel('Number of dimensions D', fontsize=18)
             plt.ylabel('Test accuracy', fontsize=18)
             plt.title(f'{transform} - {arch} - pollen', fontsize=20)
+            
             ax.tick_params(axis='x', which='major', labelsize=16)
             ax.tick_params(axis='y', which='major', labelsize=16)
             ax.set_xticks([1, 2, 3, 5, 8])
@@ -165,8 +168,10 @@ def dacc(arch, widths, layers):
 
 
 if __name__ == '__main__':
-    # viz('mlpb', widths=[16], layers=[1], dimensions=[1, 2, 3, 5, 8])
-    dacc('mlpb', widths=[16], layers=[1])
+    viz('mlpb_hydration', widths=[256], layers=[1], dimensions=[1, 2, 3, 5, 8])
+    viz('sconvb_hydration', widths=[256], layers=[1], dimensions=[1, 2, 3, 5, 8])
+    
+    # dacc('mlpb', widths=[16], layers=[1])
 
     # viz('mlpb', widths=[32], layers=[1], dimensions=[1, 2, 3, 5, 8])
     # dacc('mlpb', widths=[32], layers=[1])

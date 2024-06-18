@@ -26,9 +26,9 @@ parser.add_argument('--dataset', default='FashionMNIST', type=str,
                     help='MNIST | FashionMNIST | CIFAR10 | CIFAR100 | SVHN')
 parser.add_argument('--datadir', default='data', type=str)
 parser.add_argument('--batchsize', default=128, type=int)
-parser.add_argument('--arch', '-a', default='sconvb_hydration', type=str) # sconvb_hydration, mlpb_hydration
+parser.add_argument('--arch', '-a', default='mlpb_hydration', type=str) # sconvb_hydration, mlpb_hydration
 parser.add_argument('--nlayers', default=1, type=int)
-parser.add_argument('--width', default=512, type=int)
+parser.add_argument('--width', default=256, type=int)
 parser.add_argument('--epochs', default=100, type=int)
 parser.add_argument('--learning_rate', default=0.0001, type=float)
 parser.add_argument('--transform', default='hydration', type=str)
