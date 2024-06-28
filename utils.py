@@ -70,6 +70,13 @@ def prepare_model(args, nchannels, nclasses, hin=1):
     elif "mlpb_hydration" == args.arch:
         model = MLPB_hydration(n_layers=args.nlayers, n_units=args.width, n_channels=nchannels, n_classes=nclasses)
         
+        
+    elif "mlpb_multitasks" == args.arch:
+        model = MLPB_multitasks(n_layers=args.nlayers, n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+        
+    elif "mlpb_ensemble" == args.arch:
+        model = MLPB_ensemble(n_layers=args.nlayers, n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+        
     elif "hhnmlp" == args.arch:
         save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
         model = HHN_MLP(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
@@ -90,7 +97,9 @@ def prepare_model(args, nchannels, nclasses, hin=1):
         model = HHN_MLPB(hin=hin, dimensions=args.dimensions, n_layers=args.nlayers,
                          n_units=args.width, n_channels=nchannels, n_classes=nclasses)
         
+        
 
+        
     elif "sconv" == args.arch:
         model = SConv(n_layers=args.nlayers, n_units=args.width, n_channels=nchannels, n_classes=nclasses)
     elif "sconvb" == args.arch:
@@ -98,6 +107,9 @@ def prepare_model(args, nchannels, nclasses, hin=1):
     
     elif "sconvb_hydration" == args.arch:
         model = SConvB_pollen(n_layers=args.nlayers, n_units=args.width, n_channels=nchannels, n_classes=nclasses)
+    
+    elif "sconvb_ensemble" == args.arch:
+        model = SConvB_ensemble(n_layers=args.nlayers, n_units=args.width, n_channels=nchannels, n_classes=nclasses)
         
     elif "hhnsconv" == args.arch:
         save_dir = f'{args.arch}_{args.nlayers}_{args.width}_{args.dimensions}'
