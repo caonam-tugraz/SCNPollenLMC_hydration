@@ -154,6 +154,115 @@ class SConvB_pollen(nn.Module):
     def forward(self, x):
         logits = self.linear_stack(x)
         return logits
+
+######## SConv with bias
+class SConvB_ensemble(nn.Module):
+    def __init__(self, n_layers, n_units, n_channels, n_classes=10):
+        super(SConvB_ensemble, self).__init__()
+
+        mid_layers = []
+        mid_layers.extend([
+            nn.Conv2d(n_channels, n_units, kernel_size=25, stride=5, padding=1),
+            nn.ReLU(inplace=True)
+            ])
+
+        for _ in range(n_layers-2):
+            mid_layers.extend([
+                nn.Conv2d(n_units, n_units, kernel_size=3, stride=1, padding=1),
+                # nn.BatchNorm2d(n_units, momentium=0.9),
+                nn.ReLU(inplace=True),
+            ])
+
+        mid_layers.extend([
+            nn.Conv2d(n_units, n_units, kernel_size=15, stride=3, padding=0),
+            nn.ReLU(inplace=True),
+            nn.Flatten(),
+            nn.Linear(n_units, n_classes)
+        ])
+
+        self.linear_stack = nn.Sequential(*mid_layers)
+
+        # Initialize weights
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+                m.weight.data.normal_(0, math.sqrt(2. / n))
+                # m.bias.data.zero_()
+
+    def linearcurve(self, e0, e1, t, inputs):
+        for count, layer in enumerate(self.linear_stack):
+            if isinstance(layer, nn.Linear):
+                inputs = (1-t) * e0.linear_stack[count](inputs) + \
+                         t * e1.linear_stack[count](inputs)
+            elif isinstance(layer, nn.Conv2d):
+                inputs = (1-t) * e0.linear_stack[count](inputs) + \
+                         t * e1.linear_stack[count](inputs)
+            else:
+                inputs = self.linear_stack[count](inputs)
+        return inputs
+
+    def forward(self, x):
+        logits = self.linear_stack(x)
+        return logits
+    
+# class SConvB_ensemble(nn.Module):
+#     def __init__(self, n_layers, n_units, n_channels, n_classes=10):
+#         super(SConvB_ensemble, self).__init__()
+
+#         self.n_units = n_units
+
+#         mid_layers = []
+#         mid_layers.extend([
+#             nn.Conv2d(n_channels, n_units, kernel_size=5, stride=1, padding=2),
+#             nn.ReLU(inplace=True)
+#         ])
+
+#         for _ in range(n_layers-2):
+#             mid_layers.extend([
+#                 nn.Conv2d(n_units, n_units, kernel_size=3, stride=1, padding=1),
+#                 nn.ReLU(inplace=True),
+#             ])
+
+#         mid_layers.extend([
+#             nn.Conv2d(n_units, n_units, kernel_size=3, stride=1, padding=1),
+#             nn.ReLU(inplace=True),
+#             nn.Flatten(),
+#         ])
+
+#         self.conv_layers = nn.Sequential(*mid_layers)
+
+#         # Calculate the output size after convolutions
+#         self.output_size = n_units * 96 * 96  # Assuming the input size is 96x96 and the final output size matches the input size
+
+#         self.linear = nn.Linear(self.output_size, n_classes)
+
+#         # Initialize weights
+#         for m in self.modules():
+#             if isinstance(m, nn.Conv2d):
+#                 n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
+#                 m.weight.data.normal_(0, math.sqrt(2. / n))
+#                 # m.bias.data.zero_()
+
+#     def linearcurve(self, e0, e1, t, inputs):
+#         for count, layer in enumerate(self.conv_layers):
+#             if isinstance(layer, nn.Linear):
+#                 inputs = (1-t) * e0.conv_layers[count](inputs) + \
+#                          t * e1.conv_layers[count](inputs)
+#             elif isinstance(layer, nn.Conv2d):
+#                 inputs = (1-t) * e0.conv_layers[count](inputs) + \
+#                          t * e1.conv_layers[count](inputs)
+#             else:
+#                 inputs = self.conv_layers[count](inputs)
+        
+#         inputs = inputs.view(inputs.size(0), -1)  # Flatten before passing to linear layer
+#         inputs = (1-t) * e0.linear(inputs) + t * e1.linear(inputs)
+#         return inputs
+
+#     def forward(self, x):
+#         x = self.conv_layers(x)
+#         x = x.view(x.size(0), -1)  # Flatten before passing to linear layer
+#         logits = self.linear(x)
+#         return logits
     
 ######## HHN-SConv no bias
 class HHN_SConv(nn.Module):

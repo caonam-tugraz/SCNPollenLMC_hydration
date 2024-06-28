@@ -83,6 +83,84 @@ class MLPB_hydration(nn.Module):
         logits = self.linear_relu_stack(x)
         return logits
     
+
+########################### MLPs with bias
+class MLPB_ensemble(nn.Module):
+    def __init__(self, n_layers, n_units, n_channels, n_classes=10):
+        super(MLPB_ensemble, self).__init__()
+        mid_layers = []
+        mid_layers.extend([nn.Flatten(), nn.Linear(96 * 96 * n_channels, n_units), nn.ReLU()])
+        for _ in range(n_layers-1):
+            mid_layers.extend([
+                nn.Linear(n_units, n_units),
+                nn.BatchNorm1d(n_units),
+                nn.ReLU(),
+            ])
+        mid_layers.extend([nn.Linear(n_units, n_classes)])
+        self.linear_relu_stack = nn.Sequential(*mid_layers)
+
+    def linearcurve(self, e0, e1, t, inputs):
+        for count, layer in enumerate(self.linear_relu_stack):
+            if isinstance(layer, nn.Linear):
+                inputs = (1-t) * e0.linear_relu_stack[count](inputs) + \
+                          t * e1.linear_relu_stack[count](inputs)
+            else:
+                inputs = self.linear_relu_stack[count](inputs)
+                
+        return inputs
+
+    def forward(self, x):
+        logits = self.linear_relu_stack(x)
+        return logits
+    
+ 
+###########################
+
+class MLPB_multitasks(nn.Module):
+    def __init__(self, n_layers, n_units, n_channels, n_classes=10):
+        super(MLPB_multitasks, self).__init__()
+        self.shared_layers = []
+        self.shared_layers.extend([nn.Flatten(), nn.Linear(96 * 96 * n_channels, n_units), nn.ReLU()])
+        for _ in range(n_layers-1):
+            self.shared_layers.extend([
+                nn.Linear(n_units, n_units),
+                nn.BatchNorm1d(n_units),
+                nn.ReLU(),
+            ])
+        self.shared_layers = nn.Sequential(*self.shared_layers)
+
+        self.brightness_head = nn.Sequential(
+            nn.Linear(n_units, n_units),
+            nn.ReLU(),
+            nn.Linear(n_units, n_classes)
+        )
+
+        self.saturation_head = nn.Sequential(
+            nn.Linear(n_units, n_units),
+            nn.ReLU(),
+            nn.Linear(n_units, n_classes)
+        )
+
+    def linearcurve(self, e0, e1, t, inputs, task):
+        for count, layer in enumerate(self.shared_layers):
+            if isinstance(layer, nn.Linear):
+                inputs = (1-t) * e0.shared_layers[count](inputs) + t * e1.shared_layers[count](inputs)
+            else:
+                inputs = self.shared_layers[count](inputs)
+        
+        if task == "brightness":
+            return self.brightness_head(inputs)
+        elif task == "saturation":
+            return self.saturation_head(inputs)
+
+    def forward(self, x, task):
+        shared_output = self.shared_layers(x)
+        if task == "brightness":
+            logits = self.brightness_head(shared_output)
+        elif task == "saturation":
+            logits = self.saturation_head(shared_output)
+        return logits
+    
 ########################### HHN-MLPs no bias
 class HHN_MLP(nn.Module):
     def __init__(self, hin, dimensions, n_layers, n_units, n_channels, n_classes=10):
